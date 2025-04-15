@@ -1,0 +1,64 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: password
+
+  postgres-utilisateurs:
+    image: postgres:13
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: utilisateurs_db
+    volumes:
+      - pgdata-utilisateurs:/var/lib/postgresql/data
+
+  postgres-commandes:
+    image: postgres:13
+    ports:
+      - "5434:5432"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: commandes_db
+    volumes:
+      - pgdata-commandes:/var/lib/postgresql/data
+
+  service-utilisateurs:
+    build: ./service-utilisateurs
+    ports:
+      - "8081:8081"
+    env_file:
+      - ./service-utilisateurs/.env
+    depends_on:
+      - rabbitmq
+      - postgres-utilisateurs
+
+  service-commandes:
+    build: ./service-commandes
+    ports:
+      - "8082:8082"
+    env_file:
+      - ./service-commandes/.env
+    depends_on:
+      - rabbitmq
+      - postgres-commandes
+
+  service-notifications:
+    build: ./service-notifications
+    ports:
+      - "8083:8083"
+    env_file:
+      - ./service-notifications/.env
+    depends_on:
+      - rabbitmq
+
+volumes:
+  pgdata-utilisateurs:
+  pgdata-commandes:
