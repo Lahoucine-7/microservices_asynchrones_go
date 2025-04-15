@@ -1,0 +1,55 @@
+services:
+  postgres-utilisateurs-test:
+    image: postgres:13
+    container_name: postgres_utilisateurs_test
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: utilisateurs_db
+    ports:
+      - "5543:5432"
+    volumes:
+      - pgdata-test:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d
+
+
+  service-utilisateurs:
+    build:
+      context: .
+    container_name: service_utilisateurs_test_app
+    command: ["sh", "wait-for-it.sh", "postgres-utilisateurs-test", "5432", "--", "./main"]
+    environment:
+      POSTGRES_CONN: postgres://user:password@postgres-utilisateurs-test:5432/utilisateurs_db?sslmode=disable
+      RABBITMQ_URL: amqp://user:password@rabbitmq:5672/
+    ports:
+      - "8081:8081"
+    depends_on:
+      - postgres-utilisateurs-test
+      - rabbitmq
+
+  test-runner:
+    build:
+      context: .
+    container_name: service_utilisateurs_test_runner
+    command: ["sh", "wait-for-it.sh", "postgres-utilisateurs-test", "5432", "--", "go", "test", "-v", "./tests/..."]
+    volumes:
+      - .:/app
+    working_dir: /app
+    environment:
+      POSTGRES_CONN: postgres://user:password@postgres-utilisateurs-test:5432/utilisateurs_db?sslmode=disable
+    depends_on:
+      - service-utilisateurs
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq_test
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: password
+
+
+volumes:
+  pgdata-test:
