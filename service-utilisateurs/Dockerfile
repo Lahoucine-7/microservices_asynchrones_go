@@ -8,6 +8,8 @@ RUN go mod download
 
 COPY . .
 
+COPY wait-for-it.sh .
+
 RUN go build -o main ./cmd/main.go
 
 EXPOSE 8081
