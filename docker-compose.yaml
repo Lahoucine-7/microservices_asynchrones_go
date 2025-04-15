@@ -29,6 +29,8 @@ services:
       POSTGRES_DB: commandes_db
     volumes:
       - pgdata-commandes:/var/lib/postgresql/data
+      - ./service-commandes/initdb:/docker-entrypoint-initdb.d
+
 
   service-utilisateurs:
     build: ./service-utilisateurs
