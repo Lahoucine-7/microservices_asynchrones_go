@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "OrderUpdated",
+  "type": "object",
+  "properties": {
+    "eventType": {
+      "type": "string",
+      "enum": ["OrderUpdated"]
+    },
+    "version": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "payload": {
+      "type": "object",
+      "properties": {
+        "orderID": {
+          "type": "string"
+        },
+        "userID": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "productID": { "type": "string" },
+              "quantity": { "type": "integer", "minimum": 1 }
+            },
+            "required": ["productID", "quantity"]
+          }
+        },
+        "totalAmount": {
+          "type": "number"
+        },
+        "orderDate": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "orderID",
+        "userID",
+        "items",
+        "totalAmount",
+        "orderDate",
+        "updatedAt"
+      ]
+    }
+  },
+  "required": ["eventType", "version", "timestamp", "payload"]
+}
